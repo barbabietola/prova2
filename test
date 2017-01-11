@@ -1,0 +1,155 @@
+import sense_hat, random, time
+
+"""
+
+  Rock Paper Scissors
+  
+  Play Rock Paper Scissors with your Raspberry Pi.  Select rock, paper or
+  scissors with the joystick. The Pi picks randomly.  
+  
+  Keeps track of your score- try best out of 5!
+  
+  Note: Requires sense_hat version 2.2.0 or later
+  
+"""
+
+sense = sense_hat.SenseHat()
+
+game_state = { 
+          "comp_pick" : None,
+          "user_pick" : None,
+          "picks" : ("rock", "paper", "scissors"),
+          "choice_index" : 0,
+          "comp_score" : 0,
+          "user_score" : 0
+        }
+
+start_over_state = game_state.copy()
+
+Y = (255, 255, 0)
+G = (0, 255, 0)
+B = (0, 0, 255)
+X = (0, 0, 0)
+
+####
+# Game Images
+####
+
+big_rock = [
+    X, X, X, X, X, X, X, X,
+    X, X, X, X, X, X, X, X,
+    X, X, Y, Y, Y, X, X, X,
+    X, Y, Y, Y, Y, Y, X, X,
+    X, Y, Y, Y, X, Y, Y, X,
+    X, Y, Y, Y, Y, Y, Y, X,
+    X, X, Y, Y, Y, Y, X, X,
+    X, X, X, X, X, X, X, X
+]
+
+
+big_paper = [
+    X, X, X, X, X, X, X, X,
+    X, X, X, G, G, G, X, X,
+    X, X, G, X, G, G, X, X,
+    X, G, X, X, G, G, X, X,
+    X, G, G, G, G, G, X, X,
+    X, G, G, G, G, G, X, X,
+    X, G, G, G, G, G, X, X,
+    X, X, X, X, X, X, X, X
+]
+
+
+big_scissors = [
+    X, X, X, X, X, X, X, X,
+    X, B, X, X, X, X, B, X,
+    X, X, B, X, X, B, X, X,
+    X, X, X, B, B, X, X, X,
+    X, X, X, B, B, X, X, X,
+    X, B, B, X, X, B, B, X,
+    X, B, B, X, X, B, B, X,
+    X, X, X, X, X, X, X, X
+]
+
+
+user_rock = [
+    X, X, X, X, X, X, X, X,
+    X, X, X, X, X, Y, Y, X,
+    X, X, X, X, Y, Y, Y, Y,
+    X, X, X, X, Y, Y, Y, Y
+]
+
+user_paper = [
+    X, X, X, X, X, X, G, G,
+    X, X, X, X, X, G, X, G,
+    X, X, X, X, X, G, G, G,
+    X, X, X, X, X, G, G, G
+]
+
+user_scissors = [
+    X, X, X, X, B, X, X, B,
+    X, X, X, X, X, B, B, X,
+    X, X, X, X, X, B, B, X, 
+    X, X, X, X, B, X, X, B
+]
+
+comp_rock = [
+    X, X, X, X, X, X, X, X,
+    X, Y, Y, X, X, X, X, X,
+    Y, Y, Y, Y, X, X, X, X,
+    Y, Y, Y, Y, X, X, X, X
+]
+
+comp_paper = [
+    X, G, G, X, X, X, X, X,
+    G, X, G, X, X, X, X, X,
+    G, G, G, X, X, X, X, X,
+    G, G, G, X, X, X, X, X
+]
+
+comp_scissors = [
+    B, X, X, B, X, X, X, X,
+    X, B, B, X, X, X, X, X,
+    B, B, B, B, X, X, X, X,
+    B, X, X, B, X, X, X, X
+]
+     
+small_nothing = [
+    X, X, X, X, X, X, X, X,
+    X, X, X, X, X, X, X, X,
+    X, X, X, X, X, X, X, X,
+    X, X, X, X, X, X, X, X
+]
+
+####
+# Game Functions
+####
+
+def get_user_pick(state):
+    """
+    Takes game state and returns string of user's pick.
+    """
+    picks = state["picks"]
+    return picks[state["choice_index"] % len(picks)]
+
+def show_picks(state):
+
+    user = get_user_pick(state)
+    comp = state["comp_pick"]
+    
+    # show user pick, then comp pick
+    if user == "rock":
+        user_screen =  user_rock
+    elif user == "paper":
+        user_screen = user_paper
+    elif user == "scissors":
+        user_screen = user_scissors
+    if comp == "rock":
+        comp_screen = comp_rock
+    elif comp == "paper":
+        comp_screen = comp_paper
+    elif comp == "scissors":
+        comp_screen = comp_scissors
+    
+    # Display user choice
+    screen1 = small_nothing + user_screen
+    sense.set_pixels(screen1)
